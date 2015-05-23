@@ -1,0 +1,104 @@
+.browsehappy {
+  margin: 0.2em 0;
+  background: #ccc;
+  color: #000;
+  padding: 0.2em 0;
+}
+
+body {
+  padding: 0;
+}
+
+/* Everything but the jumbotron gets side spacing for mobile first views */
+.header,
+.marketing,
+.footer {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+/* Custom page header */
+.header {
+  border-bottom: 1px solid #e5e5e5;
+  margin-bottom: 10px;
+}
+/* Make the masthead heading the same height as the navigation */
+.header h3 {
+  margin-top: 0;
+  margin-bottom: 0;
+  line-height: 40px;
+  padding-bottom: 19px;
+}
+
+.container-narrow > hr {
+  margin: 30px 0;
+}
+
+.jumbotron .btn {
+  font-size: 21px;
+  padding: 14px 24px;
+}
+
+.lead {
+  text-align: center;
+}
+
+#canvas {
+  width: auto;
+  height: auto;
+  min-height: 400px;
+  top: 10px;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  position: absolute;
+  padding-right: 0px;
+  padding-left: 0px;
+  padding: 0;
+  border-bottom: 3px solid #eee;
+  text-align: center;
+}
+
+#canvas h1 {
+  text-align: center;
+}
+
+
+#paddle {
+  position: absolute;
+  width: 20%;
+  bottom: 20px;
+  left: 40%;
+  padding: 0;
+}
+
+.bird {
+  /* position: absolute; */
+  left: auto;
+  right: auto;
+  width: 5%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* Responsive: Portrait tablets and up */
+@media screen and (min-width: 768px) {
+
+  /* Remove the padding we set earlier */
+  .header,
+  .marketing,
+  .footer {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  /* Space out the masthead */
+  .header {
+    margin-bottom: 30px;
+  }
+  /* Remove the bottom border on the jumbotron for visual effect */
+  .jumbotron {
+    border-bottom: 0;
+  }
+}
