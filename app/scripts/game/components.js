@@ -6,10 +6,10 @@ angular
   .module('angularEcsFlapApp')
   .run(function (ngEcs) {
 
-  	function Point() {
-  		this.x = 0;
-  		this.y = 0;
-  	}
+    function Point() {
+      this.x = 0;
+      this.y = 0;
+    }
 
     Point.prototype.scale = function(s) {
       this.x *= s;
@@ -28,10 +28,10 @@ angular
       return this;
     };
 
-  	function Dom() {
+    function Dom() {
       this.selector = null;
-  		this.$element = null;
-  	}
+      this.$element = null;
+    }
 
     Dom.prototype.select = function(s) {
       this.selector = s;
@@ -51,16 +51,16 @@ angular
       return Math.max(0,Math.min(this.right,that.right) - Math.max(this.left,that.left));
     };
 
-  	ngEcs.$c('position', Point);
-  	ngEcs.$c('velocity', Point);
+    ngEcs.$c('position', Point);
+    ngEcs.$c('velocity', Point);
     ngEcs.$c('acc', Point);
 
     ngEcs.$c('bbox', BBox);
 
-  	ngEcs.$c('dom', Dom);
+    ngEcs.$c('dom', Dom);
 
-  	ngEcs.$c('control', {
-  		speed: 10
-  	});
+    ngEcs.$c('control', {
+      speed: 10
+    });
 
   });

@@ -6,32 +6,32 @@ angular
   .module('angularEcsFlapApp')
   .run(function (ngEcs) {
 
-  	ngEcs.$s('controls', {
-  		keys: {},
-  		$require: ['control','velocity'],
-  		changeKey: function(e, v) {
-  			this.keys[e.keyCode] = v;
-  		},
-  		$updateEach: function(e) {
-  			if (this.keys[32]) {
-  				e.velocity.y = -350;
-  			}
-  		},
-  		$added: function() {
+    ngEcs.$s('controls', {
+      keys: {},
+      $require: ['control','velocity'],
+      changeKey: function(e, v) {
+        this.keys[e.keyCode] = v;
+      },
+      $updateEach: function(e) {
+        if (this.keys[32]) {
+          e.velocity.y = -350;
+        }
+      },
+      $added: function() {
 
-  			var self = this;
+        var self = this;
         var doc = $(document);
 
         doc.keydown(function(e) {
-  				self.changeKey(e||window.event, true);
-  			});
+          self.changeKey(e||window.event, true);
+        });
 
         doc.keyup(function(e) {
-  				self.changeKey(e||window.event, false);
-  			});
+          self.changeKey(e||window.event, false);
+        });
 
-  		}
-  	});
+      }
+    });
 
     ngEcs.$s('dom', {
       $require: ['dom'],
@@ -40,14 +40,14 @@ angular
       }
     });
 
-  	ngEcs.$s('size', {
-  		$require: ['dom','bbox'],
+    ngEcs.$s('size', {
+      $require: ['dom','bbox'],
       $started: function() {
         // get sizes (size may change)
         this.$family.forEach(function(e) {
           var ee = e.dom.$element;
-    			e.bbox.width = ee.width();
-    			e.bbox.height = ee.height();
+          e.bbox.width = ee.width();
+          e.bbox.height = ee.height();
 
           e.bbox.top = 0;
           e.bbox.left = 0;
@@ -59,16 +59,16 @@ angular
           ee.css('padding', 0);
         });
       }
-  	});
+    });
 
     ngEcs.$s('bbox', {
       $require: ['position','bbox'],
       $updateEach: function(e) {
-  			e.bbox.top = e.position.y;
+        e.bbox.top = e.position.y;
         e.bbox.left = e.position.x;
         e.bbox.right = e.position.x+e.bbox.width;
         e.bbox.bottom = e.position.y+e.bbox.height;
-  		}
+      }
     });
 
     ngEcs.$s('acc', {
@@ -79,24 +79,24 @@ angular
       }
     });
 
-  	ngEcs.$s('velocity', {
-  		$require: ['velocity','position'],
-  		$updateEach: function(e, dt) {
-  			e.position.x += e.velocity.x*dt;
+    ngEcs.$s('velocity', {
+      $require: ['velocity','position'],
+      $updateEach: function(e, dt) {
+        e.position.x += e.velocity.x*dt;
         e.position.y += e.velocity.y*dt;
-  		}
-  	});
+      }
+    });
 
-  	ngEcs.$s('updatePosition', {
-  		$require: ['position','dom'],
+    ngEcs.$s('updatePosition', {
+      $require: ['position','dom'],
       $started: function() {
         // get positions
         this.$family.forEach(function(e) {
           var ee = e.dom.$element;
-    			var p = ee.position();
+          var p = ee.position();
 
-    			e.position.x = p.left;
-    			e.position.y = p.top;
+          e.position.x = p.left;
+          e.position.y = p.top;
         });
 
         // remove from flow
@@ -115,15 +115,15 @@ angular
           ee.css('position', 'absolute');
         });
       },
-  		$render: function() {  // todo: render each?
-  			this.$family.forEach(function(e) {
+      $render: function() {  // todo: render each?
+        this.$family.forEach(function(e) {
           e.dom.$element.css('Transform', 'translate3d(' + ~~(e.position.x) + 'px, ' + ~~(e.position.y) + 'px, 0)');
-  			});
-  		}
-  	});
+        });
+      }
+    });
 
-  	ngEcs.$s('collision', {
-  		score: 0,
+    ngEcs.$s('collision', {
+      score: 0,
       hiscore: 0,
       screen: null,
       bird: null,
@@ -132,7 +132,7 @@ angular
       startY: null,
       time: 0,
       $require: ['control'],
-  		$started: function() {
+      $started: function() {
         this.screen = ngEcs.entities.canvas;
 
         var bird = ngEcs.entities.bird;
@@ -148,8 +148,8 @@ angular
         this.time = 0;
         this.score = 0;
 
-  		},
-  		$updateEach: function(bird, dt) {
+      },
+      $updateEach: function(bird, dt) {
 
         this.time += dt;
 
@@ -172,7 +172,7 @@ angular
           this.time = 0;
         }
 
-  		},
+      },
       $render: function() {
         //this.screen.dom.$element.css('border-bottom-color', this.miss ? '#FF5858' : '#eee');
         //this.players[0].dom.$element.css('background-color', this.hit ? '#FF5858' : '#5CB85C');
@@ -189,6 +189,6 @@ angular
         this.miss = false;
         this.hit = false;
       }
-  	});
+    });
 
   });
