@@ -36,7 +36,9 @@ angular
     ngEcs.$s('dom', {
       $require: ['dom'],
       $addEntity: function(e) {
-        e.dom.select(e.dom.selector);
+        if (!e.dom.$element && e.dom.selector) {
+          e.dom.select(e.dom.selector);
+        }
       }
     });
 
@@ -122,11 +124,66 @@ angular
       }
     });
 
+    ngEcs.$s('pipes', {
+      $require: ['pipe'],
+      screen: null,
+      $started: function() {
+
+        var screen = this.screen = ngEcs.entities.canvas;
+        var forth = screen.bbox.width/4
+
+        while (this.$family.length < 5) {
+          var i = this.$family.length;
+
+          var el = angular.element('<div class="pipe"></div>');
+          angular.element(el).appendTo(screen.dom.$element);
+
+          el.css('top', 0);
+          el.css('left', 0);
+          el.css('right', 'auto');
+          el.css('bottom', 0);
+
+          ngEcs.$e({
+            dom: {
+              $element: el
+            },
+            velocity: {
+              x: -200, y: 0
+            },
+            position: {
+              x: 0,
+              y: 0
+            },
+            pipe: { cleared: false },
+            bbox: {}
+          });
+
+        }
+
+        this.$family.forEach(function(e,i) {
+          e.position.x = screen.bbox.width+i*forth;
+          e.pipe.cleared = false;
+          var w = screen.bbox.height;
+          e.dom.$element.css('background-position', '0px +'+(w*3/4*Math.random())+'px');
+        });
+
+      },
+      $updateEach: function(e) {
+        var screen = this.screen;
+        var forth = screen.bbox.width*1/4;
+        if (e.bbox.right < (screen.bbox.left-forth/2)) {
+          e.position.x = this.screen.bbox.width+forth/2;
+          e.pipe.cleared = false;
+        }
+      }
+    });
+
     ngEcs.$s('collision', {
       score: 0,
       hiscore: 0,
       screen: null,
       bird: null,
+      pipes: null,
       miss: false,
       hit: false,
       startY: null,
@@ -134,6 +191,7 @@ angular
       $require: ['control'],
       $started: function() {
         this.screen = ngEcs.entities.canvas;
+        this.pipes = ngEcs.$f(['pipe']);
 
         var bird = ngEcs.entities.bird;
 
@@ -151,6 +209,8 @@ angular
       },
       $updateEach: function(bird, dt) {
 
+        var self = this;
+
         this.time += dt;
 
         var screenBox = this.screen.bbox;
@@ -161,16 +221,21 @@ angular
 
         // ball - top/bottom
         if (bird.bbox.top < screenBox.top) {
+          bird.position.y = screenBox.top;
           this.miss = true;
         } else if (bird.bbox.bottom > screenBox.bottom) {
+          bird.position.y = screenBox.bottom-bird.bbox.height;
           this.miss = true;
         }
 
-        // todo: real score
-        if (this.time > 3) {
-          this.hit = true;
-          this.time = 0;
-        }
+        this.pipes.forEach(function(pipe) {
+          if (!pipe.pipe.cleared) {
+            if (pipe.bbox.right < bird.position.x) {
+              pipe.pipe.cleared = true;
+              self.score++;
+            }
+          }
+        });
 
       },
       $render: function() {
@@ -181,13 +246,9 @@ angular
           ngEcs.$stop();
         }
 
-        if (this.hit) {
-          this.score++;
-          if (this.score > this.hiscore) { this.hiscore = this.score; }
-        }
+        if (this.score > this.hiscore) { this.hiscore = this.score; }
 
         this.miss = false;
-        this.hit = false;
       }
     });
 
