@@ -64,35 +64,46 @@ body {
   text-align: center;
 }
 
-#paddle {
-  position: absolute;
-  width: 20%;
-  bottom: 20px;
-  left: 40%;
-  padding: 0;
+#start {
+  position: relative;
+  z-index: 1000;
 }
 
 .bird {
   /* position: absolute; */
   left: auto;
   right: auto;
-  width: 5%;
-  height: auto;
+  width: 80px;
+  height: 80px;
   margin: 0;
   padding: 0;
+  z-index: 900;
 }
 
 .pipe {
   position: absolute;
-  left: auto;
+  top: 0;
+  left: 0;
   right: auto;
-  width: 5%;
-  height: 100%;
+  bottom: auto;
+  width: 80px;
+  height: 300px;
   margin: 0;
   padding: 0;
-  background-size: 100% 100%;
-  /* background-color: red; */
-  background-image: url('../images/yeoman.png');
+  /*background-size: 100% 100%;
+  background-color: red;
+  background-image: url('../images/yeoman.png'); */
+  background-repeat: no-repeat;
+  z-index: 900;
+}
+
+.noselect {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 

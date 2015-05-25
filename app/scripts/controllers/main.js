@@ -53,7 +53,7 @@ angular.module('angularEcsFlapApp')
           x: 0, y: 0
         },
         acc: {
-          x: 0, y: 1000
+          x: 0, y: 1200
         },
         position: {
           x: 0,
