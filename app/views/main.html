@@ -2,7 +2,7 @@
   <h1 class="noselect">{{main.message()}}</h1>
   <h2 ng-bind-html="main.hiscore()" class="noselect"></h2>
   <p class="lead" class="noselect">
-    <img id="bird" class="bird" src="images/angular.png">
+    <div id="bird" class="bird"></div>
   </p>
 
   <button class="btn btn-lg btn-success" ng-click="main.click($event)" id="start" ng-if="!main.game.$playing">

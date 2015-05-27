@@ -4,7 +4,9 @@
 
 angular
   .module('angularEcsFlapApp')
-  .run(function (ngEcs) {
+  .run(function (ngEcs, assemblies) {
+
+    var power = 400;
 
     ngEcs.$s('controls', {
       keys: {},
@@ -18,7 +20,7 @@ angular
       },
       $updateEach: function(e) {
         if (!this.disabled && (this.keys[32] || this.mousedown)) {
-          e.velocity.y = -350;
+          e.velocity.y = -power;
         }
       },
       $added: function() {
@@ -56,9 +58,7 @@ angular
 
     ngEcs.$s('size', {
       $require: ['dom','bbox'],
-      $started: function() {
-        // get sizes (size may change)
-        this.$family.forEach(function(e) {
+      $addEntity: function(e) {
           var ee = e.dom.$element;
 
           e.bbox.width = ee.width();
@@ -68,10 +68,24 @@ angular
           e.bbox.left = 0;
           e.bbox.right = e.bbox.width;
           e.bbox.bottom = e.bbox.height;
+      },
+      $started: function() {
+        // get sizes (size may change)
+        this.$family.forEach(function(e) {
+          var ee = e.dom.$element;
+
+          /* e.bbox.width = ee.width();
+          e.bbox.height = ee.height();
+
+          e.bbox.top = 0;
+          e.bbox.left = 0;
+          e.bbox.right = e.bbox.width;
+          e.bbox.bottom = e.bbox.height; */
 
           ee.width(e.bbox.width);
           ee.height(e.bbox.height);
           ee.css('padding', 0);
+          ee.css('margin', 0);
         });
       }
     });
@@ -94,16 +108,14 @@ angular
 
     ngEcs.$s('updatePosition', {
       $require: ['position','dom'],
+      $addEntity: function(e) {
+        var ee = e.dom.$element;
+        var p = ee.offset();
+
+        e.position.x = p.left;
+        e.position.y = p.top;
+      },
       $started: function() {
-        // get positions
-        this.$family.forEach(function(e) {
-          var ee = e.dom.$element;
-          var p = ee.position();
-
-          e.position.x = p.left;
-          e.position.y = p.top;
-        });
-
         // remove from flow
         this.$family.forEach(function(e) {
           var ee = e.dom.$element;
@@ -115,12 +127,18 @@ angular
           ee.css('right', 'auto');
           ee.css('bottom', 'auto');
           ee.css('padding', 0);
+          ee.css('margin', 0);
           ee.width(w);
           ee.height(h);
           ee.css('position', 'absolute');
         });
+
       },
       $render: function() {
+
+        function radToDeg(a) {
+          return a*180/Math.PI;
+        }
 
         var fam = this.$family, i = fam.length, e;
 
@@ -128,10 +146,15 @@ angular
           e = fam[i];
           var t = 'translate3d(' + ~~(e.position.x) + 'px, ' + ~~(e.position.y) + 'px, 0)';
           if (e._id === 'bird') {
-            var y = Math.max(-e.velocity.y/350, -1);
-            t = t+' rotate('+(Math.acos(y)*180/Math.PI)+'deg) ';
+            var _y = -e.velocity.y/power;
+            var y = Math.max(_y, -1);
+            var yy = Math.max(_y, -0.5);
+            t = t+' rotateZ('+(radToDeg(Math.acos(y)))+'deg) rotateY('+(radToDeg(Math.asin(yy)))+'deg)';
           }
-          e.dom.$element.css('Transform', t);
+          if (e.dom.$t !== t) {
+            e.dom.$t = t;
+            e.dom.$element.css('Transform', t);
+          }
         }
 
       }
@@ -140,10 +163,18 @@ angular
     ngEcs.$s('bbox', {
       $require: ['position','bbox'],
       $updateEach: function(e) {
-        e.bbox.top = e.position.y;
-        e.bbox.left = e.position.x;
-        e.bbox.right = e.position.x+e.bbox.width;
-        e.bbox.bottom = e.position.y+e.bbox.height;
+        var bbox = e.bbox;
+        var pos = e.position;
+
+        bbox.top = pos.y;
+        bbox.left = pos.x;
+        bbox.right = pos.x+bbox.width;
+        bbox.bottom = pos.y+bbox.height;
+
+        if (bbox.margin) {
+          bbox.top += bbox.margin.top || 0;
+          bbox.bottom += bbox.margin.bottom | 0;
+        }
       }
     });
 
@@ -159,7 +190,7 @@ angular
         while (this.$family.length < 5) {
           var i = this.$family.length;
 
-          var el = angular.element('<img class="pipe" src="../images/yeoman.png"></img>');
+          var el = angular.element('<img class="pipe" src="images/yeoman.png"></img>');
           angular.element(el).appendTo($('#canvas'));
 
           el.css('top', 0);
@@ -169,22 +200,8 @@ angular
           el.css('padding', 0);
           el.css('height', 300);
 
-          //console.log(el.height());
-
-          ngEcs.$e({
-            dom: {
-              $element: el
-            },
-            velocity: {
-              x: -200, y: 0
-            },
-            position: {
-              x: 0,
-              y: 0
-            },
-            pipe: { cleared: false },
-            bbox: {}
-          });
+          var e = ngEcs.$e(angular.copy(assemblies.pipe));
+          e.$add('dom', { $element: el });
 
         }
 
@@ -209,7 +226,7 @@ angular
       miss: false,
       hit: false,
       crash: false,
-      startY: null,
+      startPos: null,
       time: 0,
       $require: ['control'],
       $started: function() {
@@ -219,10 +236,13 @@ angular
 
         var bird = ngEcs.entities.bird;
 
-        if (!this.startY) {
-          this.startY = bird.position.y;
+        if (!this.startPos) {
+          this.startPos = {};
+          this.startPos.x = bird.position.x;
+          this.startPos.y = bird.position.y;
         } else {
-          bird.position.y = this.startY;
+          bird.position.x = this.startPos.x;
+          bird.position.y = this.startPos.y;
         }
 
         bird.velocity.y = 0;
@@ -231,6 +251,8 @@ angular
         this.score = 0;
         this.miss = false;
         this.crash = false;
+
+        this.screen.dom.$element.css('background-color', '#eee');
 
       },
       $updateEach: function(bird, dt) {
@@ -245,13 +267,16 @@ angular
         var rightWall = screenBox.right;
 
         // ball - top/bottom
-        if (birdBox.top < screenBox.top) {
-          bird.position.y = screenBox.top;
-          this.miss = true;
-        } else if (birdBox.bottom > screenBox.bottom) {
+        //if (birdBox.top < screenBox.top) {
+        //  bird.position.y = screenBox.top;
+        //  this.miss = true;
+        //} else
+        if (birdBox.bottom > screenBox.bottom) {
           bird.position.y = screenBox.bottom-birdBox.height;
           this.crash = true;
         }
+
+        if (this.crash || this.miss) { return; }
 
         var fam = this.pipes, i = fam.length, pipe, pipeBox;
         while (i--) {
@@ -262,7 +287,9 @@ angular
               pipe.pipe.cleared = true;
               this.score++;
             } else if (pipeBox.left < birdBox.right) {
-              if (birdBox.top < (pipeBox.top+50) || birdBox.bottom > (pipeBox.bottom-50)) {
+              //console.log('pipe', pipeBox.top, pipeBox.bottom);
+              //console.log('bird', birdBox.top, birdBox.bottom);
+              if (birdBox.top < (pipeBox.top) || birdBox.bottom > (pipeBox.bottom)) {
                 this.miss = true;
               }
             }
@@ -275,19 +302,14 @@ angular
       },
       $render: function() {
 
-        if (this.miss) {
+        if (this.miss || this.crash) {
           if (!ngEcs.systems.controls.disabled) {
             this.screen.dom.$element.css('background-color', '#FF5858');
             ngEcs.systems.controls.disabled = true;
-          } else {
-            this.screen.dom.$element.css('background-color', '#eee');
-            this.miss = false;
           }
-        }
-
-        if (this.crash) {
-          this.miss = false;
-          ngEcs.$stop();
+          if (this.crash) {
+            ngEcs.$stop();
+          }
         }
 
         if (this.score > this.hiscore) { this.hiscore = this.score; }

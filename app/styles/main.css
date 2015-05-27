@@ -75,9 +75,12 @@ body {
   right: auto;
   width: 80px;
   height: 80px;
-  margin: 0;
+  margin-left: auto;
+  margin-right: auto;
   padding: 0;
   z-index: 900;
+  background-image: url('../images/angular.png');
+  background-size: 100% 100%;
 }
 
 .pipe {

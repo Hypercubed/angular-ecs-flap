@@ -3,7 +3,7 @@
 'use strict';
 
 angular.module('angularEcsFlapApp')
-  .controller('MainCtrl', function ($scope, ngEcs) {
+  .controller('MainCtrl', function ($scope, ngEcs, assemblies) {
 
     var main = this;
 
@@ -37,29 +37,13 @@ angular.module('angularEcsFlapApp')
       }
     };
 
-    ngEcs.$e('canvas', {  // canvas
-      dom: {
-        selector: '#canvas'
-      },
-      bbox: {}
-    });
+    ngEcs.$e('canvas',assemblies.canvas);
+    ngEcs.$e('bird',assemblies.bird);
 
-    ngEcs.$e('bird', {  // ball
-        dom: {
-          selector: '#bird',
-        },
-        bbox: {},
-        velocity: {
-          x: 0, y: 0
-        },
-        acc: {
-          x: 0, y: 1200
-        },
-        position: {
-          x: 0,
-          y: 0
-        },
-        control: {}
+    $(document).on('keydown', function(e) {
+      if (!ngEcs.$playing && e.keyCode === 32) {
+        ngEcs.$start();
+      }
     });
 
   });
