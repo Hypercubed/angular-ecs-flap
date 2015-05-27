@@ -46,4 +46,20 @@ angular.module('angularEcsFlapApp')
       }
     });
 
+    var canvas = $('.container');
+
+    function resizeCanvas() {
+      var scaleX = window.innerWidth / (canvas.width()+60);
+      var scaleY = window.innerHeight / (canvas.height()+20);
+      var scale = Math.min(scaleX, scaleY);
+
+      if (scale < 1) {
+        canvas.css('transform-origin', '0 0');
+        canvas.css('transform', "scale("+scale+")");
+      }
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas, false);
+
   });

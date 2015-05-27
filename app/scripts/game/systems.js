@@ -106,51 +106,59 @@ angular
       }
     });
 
+    function radToDeg(a) {
+      return a*180/Math.PI;
+    }
+
     ngEcs.$s('updatePosition', {
       $require: ['position','dom'],
       $addEntity: function(e) {
+        var c = $('#canvas').offset();
+
         var ee = e.dom.$element;
         var p = ee.offset();
 
-        e.position.x = p.left;
-        e.position.y = p.top;
+        e.position.x = p.left - c.left;
+        e.position.y = p.top - c.top;
+      },
+      getTranslation: function(e) {
+        var t = 'translate3d(' + ~~(e.position.x) + 'px, ' + ~~(e.position.y) + 'px, 0)';
+        if (e._id === 'bird') {
+          var _y = -e.velocity.y/power;
+          var y = Math.max(_y, -1);
+          var yy = Math.max(_y, -0.5);
+          t = t+' rotateZ('+(radToDeg(Math.acos(y)))+'deg) rotateY('+(radToDeg(Math.asin(yy)))+'deg)';
+        }
+        return t;
       },
       $started: function() {
+        var sys = this;
         // remove from flow
         this.$family.forEach(function(e) {
           var ee = e.dom.$element;
           var w = ee.width();
           var h = ee.height();
 
-          ee.css('top', 0);
-          ee.css('left', 0);
-          ee.css('right', 'auto');
-          ee.css('bottom', 'auto');
-          ee.css('padding', 0);
-          ee.css('margin', 0);
-          ee.width(w);
-          ee.height(h);
-          ee.css('position', 'absolute');
+          ee.css('top', 0)
+            .css('left', 0)
+            .css('right', 'auto')
+            .css('bottom', 'auto')
+            .css('padding', 0)
+            .css('margin', 0)
+            .width(w)
+            .height(h)
+            .css('position', 'absolute')
+            .css('Transform', sys.getTranslation(e));
         });
 
       },
       $render: function() {
 
-        function radToDeg(a) {
-          return a*180/Math.PI;
-        }
-
         var fam = this.$family, i = fam.length, e;
 
         while (i--) {
           e = fam[i];
-          var t = 'translate3d(' + ~~(e.position.x) + 'px, ' + ~~(e.position.y) + 'px, 0)';
-          if (e._id === 'bird') {
-            var _y = -e.velocity.y/power;
-            var y = Math.max(_y, -1);
-            var yy = Math.max(_y, -0.5);
-            t = t+' rotateZ('+(radToDeg(Math.acos(y)))+'deg) rotateY('+(radToDeg(Math.asin(yy)))+'deg)';
-          }
+          var t = this.getTranslation(e);
           if (e.dom.$t !== t) {
             e.dom.$t = t;
             e.dom.$element.css('Transform', t);
@@ -193,12 +201,12 @@ angular
           var el = angular.element('<img class="pipe" src="images/yeoman.png"></img>');
           angular.element(el).appendTo($('#canvas'));
 
-          el.css('top', 0);
+          /* el.css('top', 0);
           el.css('left', 0);
           el.css('right', 80);
           el.css('bottom', 300);
           el.css('padding', 0);
-          el.css('height', 300);
+          el.css('height', 300); */
 
           var e = ngEcs.$e(angular.copy(assemblies.pipe));
           e.$add('dom', { $element: el });
@@ -209,7 +217,7 @@ angular
 
         this.$family.forEach(function(e,i) {
           e.position.x = screen.bbox.width+i*forth;
-          e.position.y = h*2/4*Math.random();
+          e.position.y = h/2*Math.random();
           e.pipe.cleared = false;
 
           //e.dom.$element.css('background-position', '0px +'+(w*3/4*Math.random())+'px');
@@ -232,6 +240,7 @@ angular
       $started: function() {
         //console.log(ngEcs.entities);
         this.screen = ngEcs.entities.canvas;
+
         this.pipes = ngEcs.$f(['pipe']);
 
         var bird = ngEcs.entities.bird;

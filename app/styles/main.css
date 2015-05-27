@@ -43,15 +43,21 @@ body {
   text-align: center;
 }
 
+html, body {
+  overflow: hidden;
+}
+
+.container, #canvas {
+  width: 1580px;
+  height: 768px;
+}
+
 #canvas {
-  width: auto;
-  height: auto;
-  min-height: 400px;
   top: 10px;
-  bottom: 10px;
-  left: 10px;
-  right: 10px;
-  position: absolute;
+  bottom: auto;
+  left: auto;
+  right: auto;
+  position: relative;
   padding-right: 0px;
   padding-left: 0px;
   padding: 0;
@@ -75,9 +81,9 @@ body {
   right: auto;
   width: 80px;
   height: 80px;
+  padding: 0;
   margin-left: auto;
   margin-right: auto;
-  padding: 0;
   z-index: 900;
   background-image: url('../images/angular.png');
   background-size: 100% 100%;
@@ -107,25 +113,4 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
-
-
-/* Responsive: Portrait tablets and up */
-@media screen and (min-width: 768px) {
-
-  /* Remove the padding we set earlier */
-  .header,
-  .marketing,
-  .footer {
-    padding-left: 0;
-    padding-right: 0;
-  }
-  /* Space out the masthead */
-  .header {
-    margin-bottom: 30px;
-  }
-  /* Remove the bottom border on the jumbotron for visual effect */
-  .jumbotron {
-    border-bottom: 0;
-  }
 }

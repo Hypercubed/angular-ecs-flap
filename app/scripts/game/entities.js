@@ -39,7 +39,7 @@ angular
         x: 0, y: 0
       },
       acc: {
-        x: 0, y: 1500
+        x: 0, y: 2000
       },
       position: {
         x: 0,
