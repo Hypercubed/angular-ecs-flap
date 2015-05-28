@@ -1,5 +1,3 @@
-/* global $:true */
-
 'use strict';
 
 angular
@@ -45,7 +43,8 @@ angular
         x: 0,
         y: 0
       },
-      control: {}
+      control: true,
+      bird: true
     }
 
   });

@@ -14,5 +14,19 @@
     "angular-mocks": "^1.3.0"
   },
   "appPath": "app",
-  "moduleName": "angularEcsFlapApp"
+  "moduleName": "angularEcsFlapApp",
+  "overrides": {
+    "bootstrap": {
+      "main": [
+        "less/bootstrap.less",
+        "dist/css/bootstrap.css",
+        "dist/fonts/glyphicons-halflings-regular.eot",
+        "dist/fonts/glyphicons-halflings-regular.svg",
+        "dist/fonts/glyphicons-halflings-regular.ttf",
+        "dist/fonts/glyphicons-halflings-regular.woff",
+        "dist/fonts/glyphicons-halflings-regular.woff2"
+      ],
+      "dependencies": {}
+    }
+  }
 }

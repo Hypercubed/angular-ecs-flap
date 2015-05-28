@@ -1,12 +1,13 @@
-<div id="canvas" class="jumbotron noselect">
+<div id="canvas" class="jumbotron noselect" ng-click="main.click($event)">
   <h1 class="noselect">{{main.message()}}</h1>
   <h2 ng-bind-html="main.hiscore()" class="noselect"></h2>
   <p class="lead" class="noselect">
     <div id="bird" class="bird"></div>
+    <h3 class="noselect" ng-if="!main.game.$playing">Fly between the balloons to score</h3>
   </p>
 
   <button class="btn btn-lg btn-success" ng-click="main.click($event)" id="start" ng-if="!main.game.$playing">
-    Start
+    Click, tap, or press [space] to start
   </button>
 
 </div>

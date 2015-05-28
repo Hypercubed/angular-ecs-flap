@@ -1,5 +1,3 @@
-/* global $:true */
-
 'use strict';
 
 angular
@@ -33,14 +31,39 @@ angular
       this.$element = null;
     }
 
+    //function $(s) {
+    //  return angular.element(document.querySelector( s ));
+    //}
+
     Dom.prototype.select = function(s) {
       this.selector = s;
-      this.$element = angular.element(s);
+      return this.$element = angular.element(document.querySelector( s ));
     };
+
+    Dom.prototype.transform = function(t) {
+      this.$element
+        .css({
+          '-ms-transform':     t,
+          '-webkit-transform': t,
+          'transform':         t
+        });
+    }
 
     function BBox() {
       this.width = this.height = 0;
       this.top = this.right = this.bottom = this.left = 0;
+    }
+
+    BBox.prototype.update = function(pos) {
+      this.top = pos.y;
+      this.left = pos.x;
+      this.right = pos.x+this.width;
+      this.bottom = pos.y+this.height;
+
+      if (this.margin) {
+        this.top += this.margin.top || 0;
+        this.bottom += this.margin.bottom || 0;
+      }
     }
 
     BBox.prototype.overlapY = function(that) {
@@ -58,9 +81,5 @@ angular
     ngEcs.$c('bbox', BBox);
 
     ngEcs.$c('dom', Dom);
-
-    ngEcs.$c('control', {
-      speed: 10
-    });
 
   });

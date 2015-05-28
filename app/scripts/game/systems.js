@@ -4,13 +4,14 @@
 
 angular
   .module('angularEcsFlapApp')
-  .run(function (ngEcs, assemblies) {
+  .run(function ($document, ngEcs, assemblies) {
+
+    // $ = angular.element;
 
     var power = 400;
 
     ngEcs.$s('controls', {
       keys: {},
-      disabled: false,
       $require: ['control','velocity'],
       changeKey: function(e, v) {
         this.keys[e.keyCode] = v;
@@ -19,30 +20,27 @@ angular
         this.disabled = false;
       },
       $updateEach: function(e) {
-        if (!this.disabled && (this.keys[32] || this.mousedown)) {
+        if (this.keys[32] || this.mousedown) {
           e.velocity.y = -power;
         }
       },
       $added: function() {
 
         var self = this;
-        var doc = $(document);
 
-        doc.keydown(function(e) {
-          self.changeKey(e||window.event, true);
-        });
-
-        doc.keyup(function(e) {
-          self.changeKey(e||window.event, false);
-        });
-
-        doc.on('mousedown touchstart', function() {
-          self.mousedown = true;
-        });
-
-        doc.on('mousemove mouseup touchend touchcancel', function() {
-          self.mousedown = false;
-        });
+        $document
+          .on('keydown', function(e) {
+            self.changeKey(e||window.event, true);
+          })
+          .on('keyup', function(e) {
+            self.changeKey(e||window.event, false);
+          })
+          .on('mousedown touchstart', function() {
+            self.mousedown = true;
+          })
+          .on('mousemove mouseup touchend touchcancel', function() {
+            self.mousedown = false;
+          });
 
       }
     });
@@ -56,47 +54,17 @@ angular
       }
     });
 
-    ngEcs.$s('size', {
-      $require: ['dom','bbox'],
-      $addEntity: function(e) {
-          var ee = e.dom.$element;
-
-          e.bbox.width = ee.width();
-          e.bbox.height = ee.height();
-
-          e.bbox.top = 0;
-          e.bbox.left = 0;
-          e.bbox.right = e.bbox.width;
-          e.bbox.bottom = e.bbox.height;
-      },
-      $started: function() {
-        // get sizes (size may change)
-        this.$family.forEach(function(e) {
-          var ee = e.dom.$element;
-
-          /* e.bbox.width = ee.width();
-          e.bbox.height = ee.height();
-
-          e.bbox.top = 0;
-          e.bbox.left = 0;
-          e.bbox.right = e.bbox.width;
-          e.bbox.bottom = e.bbox.height; */
-
-          ee.width(e.bbox.width);
-          ee.height(e.bbox.height);
-          ee.css('padding', 0);
-          ee.css('margin', 0);
-        });
-      }
-    });
-
-    ngEcs.$s('acc', {
+    ngEcs.$s('acceleration', {
       $require: ['acc','velocity'],
       $updateEach: function(e, dt) {
         e.velocity.x += e.acc.x*dt;
         e.velocity.y += e.acc.y*dt;
       }
     });
+
+    function radToDeg(a) {
+      return a*180/Math.PI;
+    }
 
     ngEcs.$s('velocity', {
       $require: ['velocity','position'],
@@ -106,20 +74,14 @@ angular
       }
     });
 
-    function radToDeg(a) {
-      return a*180/Math.PI;
-    }
-
-    ngEcs.$s('updatePosition', {
-      $require: ['position','dom'],
+    ngEcs.$s('position', {
+      $require: ['position','dom','velocity'],
       $addEntity: function(e) {
-        var c = $('#canvas').offset();
-
+        var c = ngEcs.entities.canvas.dom.$element;
         var ee = e.dom.$element;
-        var p = ee.offset();
 
-        e.position.x = p.left - c.left;
-        e.position.y = p.top - c.top;
+        e.position.x = ee.prop('offsetLeft') - c.prop('offsetLeft');
+        e.position.y = ee.prop('offsetTop') - c.prop('offsetTop');
       },
       getTranslation: function(e) {
         var t = 'translate3d(' + ~~(e.position.x) + 'px, ' + ~~(e.position.y) + 'px, 0)';
@@ -136,21 +98,25 @@ angular
         // remove from flow
         this.$family.forEach(function(e) {
           var ee = e.dom.$element;
-          var w = ee.width();
-          var h = ee.height();
+          var w = ee.prop('offsetWidth');
+          var h = ee.prop('offsetHeight');
+          //var w = ee.width();
+          //var h = ee.height();
 
-          ee.css('top', 0)
-            .css('left', 0)
-            .css('right', 'auto')
-            .css('bottom', 'auto')
-            .css('padding', 0)
-            .css('margin', 0)
-            .width(w)
-            .height(h)
-            .css('position', 'absolute')
-            .css('Transform', sys.getTranslation(e));
+          ee.css({
+              'top': 0,
+              'left': 0,
+              'right': 'auto',
+              'bottom': 'auto',
+              'padding': 0,
+              'margin': 0,
+              'width': w+'px',
+              'height': h+'px',
+              'position': 'absolute'
+            });
+
+          e.dom.transform(sys.getTranslation(e));
         });
-
       },
       $render: function() {
 
@@ -161,30 +127,16 @@ angular
           var t = this.getTranslation(e);
           if (e.dom.$t !== t) {
             e.dom.$t = t;
-            e.dom.$element.css('Transform', t);
+            e.dom.transform(t);
           }
         }
 
       }
     });
 
-    ngEcs.$s('bbox', {
-      $require: ['position','bbox'],
-      $updateEach: function(e) {
-        var bbox = e.bbox;
-        var pos = e.position;
-
-        bbox.top = pos.y;
-        bbox.left = pos.x;
-        bbox.right = pos.x+bbox.width;
-        bbox.bottom = pos.y+bbox.height;
-
-        if (bbox.margin) {
-          bbox.top += bbox.margin.top || 0;
-          bbox.bottom += bbox.margin.bottom | 0;
-        }
-      }
-    });
+    //function $(s) {
+    //  return angular.element(document.querySelector( s ));
+    //}
 
     ngEcs.$s('pipes', {
       $require: ['pipe'],
@@ -192,36 +144,55 @@ angular
       $started: function() {
 
         var screen = this.screen = ngEcs.entities.canvas;
-        var forth = screen.bbox.width/4
+        var forth = screen.bbox.width/4;
         var h = screen.bbox.height;
 
         while (this.$family.length < 5) {
-          var i = this.$family.length;
 
           var el = angular.element('<img class="pipe" src="images/yeoman.png"></img>');
-          angular.element(el).appendTo($('#canvas'));
+          //angular.element(el).appendTo(screen.dom.$element);
+          angular.element(screen.dom.$element).append(el);
 
-          /* el.css('top', 0);
-          el.css('left', 0);
-          el.css('right', 80);
-          el.css('bottom', 300);
-          el.css('padding', 0);
-          el.css('height', 300); */
-
-          var e = ngEcs.$e(angular.copy(assemblies.pipe));
-          e.$add('dom', { $element: el });
+          ngEcs.$e(angular.copy(assemblies.pipe))
+            .$add('dom', { $element: el });
 
         }
 
-        ngEcs.systems.size.$started();
+        ngEcs.systems.bbox.$started();
 
         this.$family.forEach(function(e,i) {
           e.position.x = screen.bbox.width+i*forth;
           e.position.y = h/2*Math.random();
           e.pipe.cleared = false;
-
-          //e.dom.$element.css('background-position', '0px +'+(w*3/4*Math.random())+'px');
         });
+      }
+    });
+
+    ngEcs.$s('bbox', {
+      $require: ['dom','bbox'],
+      $addEntity: function(e) {
+          var ee = e.dom.$element;
+
+          e.bbox.top = 0;
+          e.bbox.left = 0;
+          e.bbox.right = e.bbox.width = ee.prop('offsetWidth');
+          e.bbox.bottom = e.bbox.height= ee.prop('offsetHeight');
+      },
+      $started: function() {
+        this.$family.forEach(function(e) {
+
+          e.dom.$element
+            .css({
+              'width': e.bbox.width+'px',
+              'height': e.bbox.height+'px',
+              'padding': 0,
+              'margin': 0
+            });
+
+        });
+      },
+      $updateEach: function(e) {
+        e.position && e.bbox.update(e.position);
       }
     });
 
@@ -236,14 +207,15 @@ angular
       crash: false,
       startPos: null,
       time: 0,
-      $require: ['control'],
+      $require: ['bird'],
       $started: function() {
         //console.log(ngEcs.entities);
         this.screen = ngEcs.entities.canvas;
 
         this.pipes = ngEcs.$f(['pipe']);
 
-        var bird = ngEcs.entities.bird;
+        var bird = this.$family[0];
+        bird.$add('control', true);
 
         if (!this.startPos) {
           this.startPos = {};
@@ -271,10 +243,6 @@ angular
         var screenBox = this.screen.bbox;
         var birdBox = bird.bbox;
 
-        // area bounds
-        var leftWall = screenBox.left;
-        var rightWall = screenBox.right;
-
         // ball - top/bottom
         //if (birdBox.top < screenBox.top) {
         //  bird.position.y = screenBox.top;
@@ -300,6 +268,7 @@ angular
               //console.log('bird', birdBox.top, birdBox.bottom);
               if (birdBox.top < (pipeBox.top) || birdBox.bottom > (pipeBox.bottom)) {
                 this.miss = true;
+                bird.$remove('control');
               }
             }
           } else if (pipeBox.right < (screenBox.left-screenBox.width/8)) {
@@ -314,7 +283,6 @@ angular
         if (this.miss || this.crash) {
           if (!ngEcs.systems.controls.disabled) {
             this.screen.dom.$element.css('background-color', '#FF5858');
-            ngEcs.systems.controls.disabled = true;
           }
           if (this.crash) {
             ngEcs.$stop();

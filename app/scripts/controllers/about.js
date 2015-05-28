@@ -8,6 +8,6 @@
  * Controller of the angularEcsPongApp
  */
 angular.module('angularEcsFlapApp')
-  .controller('AboutCtrl', function ($scope) {
+  .controller('AboutCtrl', function () {
 
   });
