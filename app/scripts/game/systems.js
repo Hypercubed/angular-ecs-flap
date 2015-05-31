@@ -4,9 +4,33 @@ angular
   .module('angularEcsFlapApp')
   .run(function ($document, $cookies, ngEcs, assemblies) {
 
-    // $ = angular.element;
-
     var power = 400;
+
+    ngEcs.$s('meter', {
+      meter: null,
+      $added: function() {
+        var meter = this.meter = new FPSMeter({
+          graph:   1, // Whether to show history graph.
+          history: 20 // How many history states to show in a graph.
+        });
+        meter.hide();
+
+        $document
+          .on('keypress', function(e) {
+            if (e.which === 126) {
+              if (meter.isPaused) {
+                meter.show();
+              } else {
+                meter.hide();
+              }
+            }
+          });
+
+      },
+      $render: function() {
+        this.meter.tick();
+      }
+    });
 
     ngEcs.$s('controls', {
       keys: {},

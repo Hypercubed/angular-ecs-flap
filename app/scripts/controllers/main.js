@@ -20,7 +20,7 @@ angular.module('angularEcsFlapApp')
       if (main.game.systems.collision.hiscore > 0) {
         return 'High Score: '+main.game.systems.collision.hiscore;
       } else {
-        return 'Built using angular-ecs';
+        return 'Built using AngularJS and angular-ecs';
       }
     };
 

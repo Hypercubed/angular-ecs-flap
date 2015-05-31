@@ -27,6 +27,7 @@ module.exports = function(config) {
       'bower_components/js-signals/dist/signals.js',
       'bower_components/angular-ecs/dist/angular-ecs.js',
       'bower_components/angular-cookies/angular-cookies.js',
+      'bower_components/fpsmeter/dist/fpsmeter.js',
       'bower_components/angular-mocks/angular-mocks.js',
       // endbower
       'app/scripts/**/*.js',
