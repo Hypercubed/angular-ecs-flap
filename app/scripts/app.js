@@ -31,4 +31,7 @@ angular
       .otherwise({
         redirectTo: '/'
       });
+  })
+  .factory('isMobile', function($window) {
+    return $window.innerWidth < 768;
   });

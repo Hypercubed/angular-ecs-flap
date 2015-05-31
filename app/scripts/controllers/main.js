@@ -1,12 +1,12 @@
 'use strict';
 
 angular.module('angularEcsFlapApp')
-  .controller('MainCtrl', function ($window, $document, $scope, ngEcs, assemblies) {
+  .controller('MainCtrl', function ($window, $document, $scope, $route, ngEcs, assemblies, isMobile) {
 
     var main = this;
 
     main.game = ngEcs;
-    ngEcs.$fps = 60;
+    ngEcs.$fps = isMobile ? 45 : 60;
 
     main.message = function() {
       if (main.game.$playing) {
@@ -42,21 +42,26 @@ angular.module('angularEcsFlapApp')
       c.$element.addClass('land');
     });
 
+    var scale = null;
+
     function resizeCanvas() {
-      console.log('resizeCanvas');
+
       var container = document.querySelector('#container');
       var scaleX = container.offsetWidth / (c.$element.prop('offsetWidth'));
-      var scaleY = container.offsetHeight / (c.$element.prop('offsetHeight'));
-      var scale = Math.min(scaleX, scaleY);
 
-      if (scaleX < 1) {
-        c._css('transform-origin', '0 0')
-          .transform('translate3d(0,0,0) scale3d('+scaleX+', '+scaleX+', 1)');
+      if (scaleX < 1 && scaleX !== scale) {
+        if (isMobile && scale !== null) {
+          $window.location.reload();
+        } else {
+          scale = scaleX;
+          c._css('transform-origin', '0 0')
+            .transform('translate3d(0,0,0) scale3d('+scale+','+scale+',1)');
+        }
       }
     }
 
     resizeCanvas();
+
     $window.addEventListener('resize', resizeCanvas, false);
-    $document.on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', resizeCanvas);
 
   });

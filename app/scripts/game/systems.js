@@ -2,11 +2,11 @@
 
 angular
   .module('angularEcsFlapApp')
-  .run(function ($document, $cookies, ngEcs, assemblies) {
+  .run(function ($window, $document, $cookies, ngEcs, assemblies, isMobile) {
 
     var power = 400;
 
-    ngEcs.$s('meter', {
+    isMobile || ngEcs.$s('meter', {
       meter: null,
       $added: function() {
         var meter = this.meter = new FPSMeter({
@@ -156,19 +156,21 @@ angular
     ngEcs.$s('scroll', {
       $require: ['scroll','dom','velocity'],
       $updateEach: function(e,dt) {
-        //console.log('update');
         e.scroll.x = (e.scroll.x + e.velocity.x*dt);
         e.scroll.y = (e.scroll.y + e.velocity.y*dt);
       },
       $render: function() {
-        //console.log('render');
 
-        var fam = this.$family, i = fam.length, e;
+        //var fam = this.$family, i = fam.length, e;
 
-        while (i--) {
-          var e = fam[0];
-          e.dom.$element.css('background-position', ~~e.scroll.x+'px '+ ~~e.scroll.y+'px')
-        }
+        //while (i--) {
+          var e = this.$family[0];
+          var t = ''+ ~~e.scroll.x+'px '+ ~~e.scroll.y+'px';
+          if (e.dom.$t !== t) {
+            e.dom.$t = t;
+            e.dom.$element.css('background-position', t);
+          }
+        //}
 
       }
     });

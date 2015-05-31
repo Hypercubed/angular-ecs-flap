@@ -79,6 +79,13 @@ html, body {
   background-position: 0 288px;
 }
 
+@media only screen and (max-width: 767px) {
+  #canvas {
+    background-image: url('../images/sf-paper-mobile.png');
+    background-size: 2328px 477px;
+  }
+}
+
 #canvas.land {
   /* background-position: 0 708px; */
 }
@@ -101,7 +108,7 @@ html, body {
   left: auto;
   right: auto;
   width: 80px;
-  height: 80px;
+  height: 85px;
   padding: 0;
   margin-left: auto;
   margin-right: auto;
