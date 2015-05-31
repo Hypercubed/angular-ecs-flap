@@ -32,6 +32,14 @@ angular.module('angularEcsFlapApp')
     var c = ngEcs.$e('canvas',assemblies.canvas).dom;
     ngEcs.$e('bird',assemblies.bird);
 
+    ngEcs.$e({
+      dom: {
+        selector: '.canvas-bg'
+      },
+      velocity: {x:-100,y:0},
+      scroll: {x:0,y:0,repeatX:2328}
+    });
+
     $document.on('keydown', function(e) {
       if (!ngEcs.$playing && e.keyCode === 32) {
         ngEcs.$start();
@@ -42,26 +50,17 @@ angular.module('angularEcsFlapApp')
       c.$element.addClass('land');
     });
 
-    var scale = null;
 
+    var container = document.querySelector('#container');
     function resizeCanvas() {
-
-      var container = document.querySelector('#container');
       var scaleX = container.offsetWidth / (c.$element.prop('offsetWidth'));
 
-      if (scaleX < 1 && scaleX !== scale) {
-        if (isMobile && scale !== null) {
-          $window.location.reload();
-        } else {
-          scale = scaleX;
-          c._css('transform-origin', '0 0')
-            .transform('translate3d(0,0,0) scale3d('+scale+','+scale+',1)');
-        }
-      }
+      c._css('transform-origin', '0 0')
+        .transform('translate3d(0,0,0) scale3d('+scaleX+','+scaleX+',1)');
+
     }
 
     resizeCanvas();
-
     $window.addEventListener('resize', resizeCanvas, false);
 
   });

@@ -12,9 +12,7 @@ angular
         margin: {
           bottom: 0
         }
-      },
-      velocity: {x:-100,y:0},
-      scroll: {x:0,y:288}
+      }
     },
 
     pipe: {

@@ -1,3 +1,5 @@
+/* global FPSMeter:true */
+
 'use strict';
 
 angular
@@ -145,8 +147,7 @@ angular
           e = fam[i];
           var t = this.getTranslation(e);
           if (e.dom.$t !== t) {
-            e.dom.$t = t;
-            e.dom.transform(t);
+            e.dom.transform(t).$t = t;
           }
         }
 
@@ -155,22 +156,35 @@ angular
 
     ngEcs.$s('scroll', {
       $require: ['scroll','dom','velocity'],
+      $addEntity: function(e) {
+        e.dom.$element.css('width', e.scroll.repeatX*2+'px');
+        e.dom.transform(this.getTranslation(e));
+      },
+      /* $started: function() {
+        var sys = this;
+        this.$family.forEach(function(e) {
+          e.dom.$element.css('width', e.scroll.repeatX*2+'px');
+          e.dom.transform(sys.getTranslation(e));
+        });
+      }, */
       $updateEach: function(e,dt) {
-        e.scroll.x = (e.scroll.x + e.velocity.x*dt);
+        e.scroll.x = (e.scroll.x + e.velocity.x*dt) % e.scroll.repeatX;
         e.scroll.y = (e.scroll.y + e.velocity.y*dt);
+      },
+      getTranslation: function(e) {
+        return 'translate3d(' + ~~(e.scroll.x) + 'px, ' + ~~(e.scroll.y) + 'px, 0)';
       },
       $render: function() {
 
-        //var fam = this.$family, i = fam.length, e;
-
-        //while (i--) {
-          var e = this.$family[0];
-          var t = ''+ ~~e.scroll.x+'px '+ ~~e.scroll.y+'px';
+        var fam = this.$family, i = fam.length, e;
+        var t;
+        while (i--) {
+          e = fam[i];
+          t = this.getTranslation(e);
           if (e.dom.$t !== t) {
-            e.dom.$t = t;
-            e.dom.$element.css('background-position', t);
+            e.dom.transform(t).$t = t;
           }
-        //}
+        }
 
       }
     });
