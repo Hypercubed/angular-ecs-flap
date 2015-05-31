@@ -8,7 +8,13 @@ angular
       dom: {
         selector: '#canvas'
       },
-      bbox: {}
+      bbox: {
+        margin: {
+          bottom: 0
+        }
+      },
+      velocity: {x:-100,y:0},
+      scroll: {x:0,y:288}
     },
 
     pipe: {
@@ -23,7 +29,7 @@ angular
       bbox: {
         margin: {
           top: 50,
-          bottom: -50
+          bottom: 50
         }
       }
     },

@@ -31,23 +31,23 @@ angular
       this.$element = null;
     }
 
-    //function $(s) {
-    //  return angular.element(document.querySelector( s ));
-    //}
-
     Dom.prototype.select = function(s) {
       this.selector = s;
       return this.$element = angular.element(document.querySelector( s ));
     };
 
+    Dom.prototype._css = function(k, t) {
+      var e = this.$element;
+      ['-ms-','-webkit-',''].forEach(function(p) {
+        e.css(p+k,t);
+      });
+      return this;
+    };
+
     Dom.prototype.transform = function(t) {
-      this.$element
-        .css({
-          '-ms-transform':     t,
-          '-webkit-transform': t,
-          'transform':         t
-        });
-    }
+      this._css('transform',t);
+      return this;
+    };
 
     function BBox() {
       this.width = this.height = 0;
@@ -62,9 +62,9 @@ angular
 
       if (this.margin) {
         this.top += this.margin.top || 0;
-        this.bottom += this.margin.bottom || 0;
+        this.bottom -= this.margin.bottom || 0;
       }
-    }
+    };
 
     BBox.prototype.overlapY = function(that) {
       return Math.max(0,Math.min(this.bottom,that.bottom) - Math.max(this.top,that.top));
@@ -77,6 +77,7 @@ angular
     ngEcs.$c('position', Point);
     ngEcs.$c('velocity', Point);
     ngEcs.$c('acc', Point);
+    ngEcs.$c('scroll', Point);
 
     ngEcs.$c('bbox', BBox);
 

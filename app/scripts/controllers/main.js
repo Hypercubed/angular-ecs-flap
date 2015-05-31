@@ -1,5 +1,3 @@
-/* global $:true */
-
 'use strict';
 
 angular.module('angularEcsFlapApp')
@@ -31,7 +29,7 @@ angular.module('angularEcsFlapApp')
       ngEcs.$start();
     };
 
-    ngEcs.$e('canvas',assemblies.canvas);
+    var c = ngEcs.$e('canvas',assemblies.canvas).dom;
     ngEcs.$e('bird',assemblies.bird);
 
     $document.on('keydown', function(e) {
@@ -40,24 +38,25 @@ angular.module('angularEcsFlapApp')
       }
     });
 
-    function $(s) {
-      return angular.element(document.querySelector( s ));
-    }
-
-    var canvas = $('.container');
+    ngEcs.started.add(function() {
+      c.$element.addClass('land');
+    });
 
     function resizeCanvas() {
-      var scaleX = window.innerWidth / (canvas.prop('offsetWidth')+60);
-      var scaleY = window.innerHeight / (canvas.prop('offsetHeight')+20);
+      console.log('resizeCanvas');
+      var container = document.querySelector('#container');
+      var scaleX = container.offsetWidth / (c.$element.prop('offsetWidth'));
+      var scaleY = container.offsetHeight / (c.$element.prop('offsetHeight'));
       var scale = Math.min(scaleX, scaleY);
 
-      if (scale < 1) {
-        canvas.css('transform-origin', '0 0');
-        canvas.css('transform', 'scale('+scale+')');
+      if (scaleX < 1) {
+        c._css('transform-origin', '0 0')
+          .transform('translate3d(0,0,0) scale3d('+scaleX+', '+scaleX+', 1)');
       }
     }
 
     resizeCanvas();
     $window.addEventListener('resize', resizeCanvas, false);
+    $document.on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', resizeCanvas);
 
   });

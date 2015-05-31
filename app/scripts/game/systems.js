@@ -1,10 +1,8 @@
-/* global $:true */
-
 'use strict';
 
 angular
   .module('angularEcsFlapApp')
-  .run(function ($document, ngEcs, assemblies) {
+  .run(function ($document, $cookies, ngEcs, assemblies) {
 
     // $ = angular.element;
 
@@ -66,16 +64,9 @@ angular
       return a*180/Math.PI;
     }
 
-    ngEcs.$s('velocity', {
-      $require: ['velocity','position'],
-      $updateEach: function(e, dt) {
-        e.position.x += e.velocity.x*dt;
-        e.position.y += e.velocity.y*dt;
-      }
-    });
-
     ngEcs.$s('position', {
       $require: ['position','dom','velocity'],
+
       $addEntity: function(e) {
         var c = ngEcs.entities.canvas.dom.$element;
         var ee = e.dom.$element;
@@ -118,6 +109,10 @@ angular
           e.dom.transform(sys.getTranslation(e));
         });
       },
+      $updateEach: function(e, dt) {
+        e.position.x += e.velocity.x*dt;
+        e.position.y += e.velocity.y*dt;
+      },
       $render: function() {
 
         var fam = this.$family, i = fam.length, e;
@@ -134,9 +129,25 @@ angular
       }
     });
 
-    //function $(s) {
-    //  return angular.element(document.querySelector( s ));
-    //}
+    ngEcs.$s('scroll', {
+      $require: ['scroll','dom','velocity'],
+      $updateEach: function(e,dt) {
+        //console.log('update');
+        e.scroll.x = (e.scroll.x + e.velocity.x*dt);
+        e.scroll.y = (e.scroll.y + e.velocity.y*dt);
+      },
+      $render: function() {
+        //console.log('render');
+
+        var fam = this.$family, i = fam.length, e;
+
+        while (i--) {
+          var e = fam[0];
+          e.dom.$element.css('background-position', ~~e.scroll.x+'px '+ ~~e.scroll.y+'px')
+        }
+
+      }
+    });
 
     ngEcs.$s('pipes', {
       $require: ['pipe'],
@@ -173,10 +184,10 @@ angular
       $addEntity: function(e) {
           var ee = e.dom.$element;
 
-          e.bbox.top = 0;
-          e.bbox.left = 0;
-          e.bbox.right = e.bbox.width = ee.prop('offsetWidth');
-          e.bbox.bottom = e.bbox.height= ee.prop('offsetHeight');
+          e.bbox.width = ee.prop('offsetWidth');
+          e.bbox.height= ee.prop('offsetHeight');
+
+          e.bbox.update({x:0, y:0});
       },
       $started: function() {
         this.$family.forEach(function(e) {
@@ -209,7 +220,9 @@ angular
       time: 0,
       $require: ['bird'],
       $started: function() {
-        //console.log(ngEcs.entities);
+
+        this.hiscore = $cookies.hiscore || 0;
+
         this.screen = ngEcs.entities.canvas;
 
         this.pipes = ngEcs.$f(['pipe']);
@@ -233,7 +246,7 @@ angular
         this.miss = false;
         this.crash = false;
 
-        this.screen.dom.$element.css('background-color', '#eee');
+        this.screen.dom.$element.removeClass('crash');
 
       },
       $updateEach: function(bird, dt) {
@@ -281,15 +294,16 @@ angular
       $render: function() {
 
         if (this.miss || this.crash) {
-          if (!ngEcs.systems.controls.disabled) {
-            this.screen.dom.$element.css('background-color', '#FF5858');
-          }
+          this.screen.dom.$element.addClass('crash');
           if (this.crash) {
             ngEcs.$stop();
           }
         }
 
         if (this.score > this.hiscore) { this.hiscore = this.score; }
+      },
+      $stopped: function() {
+        $cookies.hiscore = this.hiscore;
       }
     });
 
