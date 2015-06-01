@@ -200,7 +200,7 @@ angular
 
         while (this.$family.length < 5) {
 
-          var el = angular.element('<img class="pipe" src="images/yeoman.png"></img>');
+          var el = angular.element('<img class="pipe" src="images/cat.png"></img>');
           //angular.element(el).appendTo(screen.dom.$element);
           angular.element(screen.dom.$element).append(el);
 
