@@ -1,53 +1,72 @@
 'use strict';
 
+angular.module('ngEcs.dom', ['hc.ngEcs'])
+  .config(function($componentsProvider) {
+
+    $componentsProvider.register('dom', function() {
+
+      function Dom(selector) {
+        this.selector = selector || null;
+
+        if (angular.isString(selector) && selector.charAt(0) != '<') {
+          selector = document.querySelector(selector);
+        }
+
+        angular.element.call(this, selector);
+
+        this.$cachedStyle = {};
+      }
+
+      Dom.$inject = ['selector'];
+
+      Dom.prototype = Object.create(angular.element.prototype); //new angular.element();
+
+      Dom.prototype.element = Dom;
+
+      Dom.prototype.cachedCss = function(k,v) {
+        if (this.$cachedStyle[k] !== v) {
+          this[0].style[k] = v;
+          this.$cachedStyle[k] = v;
+        }
+      };
+
+      var vendorPrefixes = [ "-moz-", "-webkit-", "-o-", "-ms-", '' ];
+
+      Dom.prototype.prefixedCss = function(k,v) {
+        if (this.$cachedStyle[k] !== v) {
+          var style = this[0].style;
+          for(var i = 0; i < 5; i++) {
+            style[vendorPrefixes[i]+k] = v;
+          }
+        }
+        return this;
+      };
+
+      Dom.prototype.transform = function(x,y,z) {
+        if (typeof x === 'string') {
+          return this.prefixedCss('transform',x);
+        }
+        x = ~~x || 0;
+        y = ~~y || 0
+        z = ~~z || 0;
+        return this.prefixedCss('transform', 'translate3d('+x+'px,'+y+'px,'+z+'px)');
+      };
+
+      return Dom;
+    });
+
+  });
+
 angular
   .module('angularEcsFlapApp')
   .run(function (ngEcs) {
 
-    function Point() {
-      this.x = 0;
-      this.y = 0;
-    }
+    Victor.$inject = ['x','y'];
 
-    Point.prototype.scale = function(s) {
-      this.x *= s;
-      this.y *= s;
-      return this;
-    };
-
-    Point.prototype.mag = function() {
-      return Math.sqrt(this.x*this.x+this.y*this.y);
-    };
-
-    Point.prototype.norm = function() {
-      var m = this.mag();
-      this.x /= m;
-      this.y /= m;
-      return this;
-    };
-
-    function Dom() {
-      this.selector = null;
-      this.$element = null;
-    }
-
-    Dom.prototype.select = function(s) {
-      this.selector = s;
-      return this.$element = angular.element(document.querySelector( s ));
-    };
-
-    Dom.prototype._css = function(k, t) {
-      var e = this.$element;
-      ['-ms-','-webkit-',''].forEach(function(p) {
-        e.css(p+k,t);
-      });
-      return this;
-    };
-
-    Dom.prototype.transform = function(t) {
-      this._css('transform',t);
-      return this;
-    };
+    ngEcs.$c('position', Victor);
+    ngEcs.$c('velocity', Victor);
+    ngEcs.$c('acc', Victor);
+    ngEcs.$c('scroll', {x:0,y:0,repeatX:0});
 
     function BBox() {
       this.width = this.height = 0;
@@ -74,13 +93,6 @@ angular
       return Math.max(0,Math.min(this.right,that.right) - Math.max(this.left,that.left));
     };
 
-    ngEcs.$c('position', Point);
-    ngEcs.$c('velocity', Point);
-    ngEcs.$c('acc', Point);
-    ngEcs.$c('scroll', Point);
-
     ngEcs.$c('bbox', BBox);
-
-    ngEcs.$c('dom', Dom);
 
   });

@@ -6,7 +6,7 @@ angular.module('angularEcsFlapApp')
     var main = this;
 
     main.game = ngEcs;
-    ngEcs.$fps = isMobile ? 60 : 60;
+    ngEcs.$fps = isMobile ? 60 : 45;
 
     main.message = function() {
       if (main.game.$playing) {
@@ -54,16 +54,11 @@ angular.module('angularEcsFlapApp')
       }
     });
 
-    ngEcs.started.add(function() {
-      c.$element.addClass('land');
-    });
-
-
     var container = document.querySelector('#container');
     function resizeCanvas() {
-      var scaleX = container.offsetWidth / (c.$element.prop('offsetWidth'));
+      var scaleX = container.offsetWidth / (c.prop('offsetWidth'));
 
-      c._css('transform-origin', '0 0')
+      c.prefixedCss('transform-origin', '0 0')
         .transform('translate3d(0,0,0) scale3d('+scaleX+','+scaleX+',1)');
 
     }

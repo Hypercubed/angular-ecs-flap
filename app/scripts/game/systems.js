@@ -3,12 +3,10 @@
 'use strict';
 
 angular
-  .module('angularEcsFlapApp')
-  .run(function ($window, $document, $cookies, ngEcs, assemblies, isMobile) {
+  .module('ngEcs.FPSMeter', ['hc.ngEcs'])
+  .run(function(ngEcs, $document) {
 
-    var power = 400;
-
-    isMobile || ngEcs.$s('meter', {
+    ngEcs.$s('meter', {
       meter: null,
       $added: function() {
         var meter = this.meter = new FPSMeter({
@@ -34,19 +32,19 @@ angular
       }
     });
 
+  });
+
+angular
+  .module('angularEcsFlapApp')
+  .run(function ($window, $document, $cookies, ngEcs, assemblies, isMobile) {
+
+    var power = 400;
+
     ngEcs.$s('controls', {
       keys: {},
       $require: ['control','velocity'],
       changeKey: function(e, v) {
         this.keys[e.keyCode] = v;
-      },
-      $started: function() {
-        this.disabled = false;
-      },
-      $updateEach: function(e) {
-        if (this.keys[32] || this.mousedown) {
-          e.velocity.y = -power;
-        }
       },
       $added: function() {
 
@@ -66,14 +64,13 @@ angular
             self.mousedown = false;
           });
 
-      }
-    });
-
-    ngEcs.$s('dom', {
-      $require: ['dom'],
-      $addEntity: function(e) {
-        if (!e.dom.$element && e.dom.selector) {
-          e.dom.select(e.dom.selector);
+      },
+      $started: function() {
+        this.disabled = false;
+      },
+      $updateEach: function(e) {
+        if (this.keys[32] || this.mousedown) {
+          e.velocity.y = -power;
         }
       }
     });
@@ -94,8 +91,8 @@ angular
       $require: ['position','dom','velocity'],
 
       $addEntity: function(e) {
-        var c = ngEcs.entities.canvas.dom.$element;
-        var ee = e.dom.$element;
+        var c = ngEcs.entities.canvas.dom;
+        var ee = e.dom;
 
         e.position.x = ee.prop('offsetLeft') - c.prop('offsetLeft');
         e.position.y = ee.prop('offsetTop') - c.prop('offsetTop');
@@ -114,7 +111,7 @@ angular
         var sys = this;
         // remove from flow
         this.$family.forEach(function(e) {
-          var ee = e.dom.$element;
+          var ee = e.dom;
           var w = ee.prop('offsetWidth');
           var h = ee.prop('offsetHeight');
           //var w = ee.width();
@@ -139,53 +136,23 @@ angular
         e.position.x += e.velocity.x*dt;
         e.position.y += e.velocity.y*dt;
       },
-      $render: function() {
-
-        var fam = this.$family, i = fam.length, e;
-
-        while (i--) {
-          e = fam[i];
-          var t = this.getTranslation(e);
-          if (e.dom.$t !== t) {
-            e.dom.transform(t).$t = t;
-          }
-        }
-
+      $renderEach: function(e) {
+        e.dom.transform(this.getTranslation(e));
       }
     });
 
     ngEcs.$s('scroll', {
       $require: ['scroll','dom','velocity'],
       $addEntity: function(e) {
-        e.dom.$element.css('width', e.scroll.repeatX*2+'px');
-        e.dom.transform(this.getTranslation(e));
+        e.dom.css('width', e.scroll.repeatX*2+'px');
+        e.dom.transform(e.scroll.x, e.scroll.y);
       },
-      /* $started: function() {
-        var sys = this;
-        this.$family.forEach(function(e) {
-          e.dom.$element.css('width', e.scroll.repeatX*2+'px');
-          e.dom.transform(sys.getTranslation(e));
-        });
-      }, */
       $updateEach: function(e,dt) {
         e.scroll.x = (e.scroll.x + e.velocity.x*dt) % e.scroll.repeatX;
         e.scroll.y = (e.scroll.y + e.velocity.y*dt);
       },
-      getTranslation: function(e) {
-        return 'translate3d(' + ~~(e.scroll.x) + 'px, ' + ~~(e.scroll.y) + 'px, 0)';
-      },
-      $render: function() {
-
-        var fam = this.$family, i = fam.length, e;
-        var t;
-        while (i--) {
-          e = fam[i];
-          t = this.getTranslation(e);
-          if (e.dom.$t !== t) {
-            e.dom.transform(t).$t = t;
-          }
-        }
-
+      $renderEach: function(e) {
+        e.dom.transform(e.scroll.x, e.scroll.y);
       }
     });
 
@@ -200,12 +167,13 @@ angular
 
         while (this.$family.length < 5) {
 
-          var el = angular.element('<img class="pipe" src="images/cat.png"></img>');
-          //angular.element(el).appendTo(screen.dom.$element);
-          angular.element(screen.dom.$element).append(el);
+          var dom = new ngEcs.components.dom('<img class="pipe" src="images/cat.png"></img>');
+          screen.dom.append(dom);
 
           ngEcs.$e(angular.copy(assemblies.pipe))
-            .$add('dom', { $element: el });
+            .$add('dom', dom);
+
+          //screen.dom.append(e.dom);
 
         }
 
@@ -222,7 +190,7 @@ angular
     ngEcs.$s('bbox', {
       $require: ['dom','bbox'],
       $addEntity: function(e) {
-          var ee = e.dom.$element;
+          var ee = e.dom;
 
           e.bbox.width = ee.prop('offsetWidth');
           e.bbox.height= ee.prop('offsetHeight');
@@ -232,7 +200,7 @@ angular
       $started: function() {
         this.$family.forEach(function(e) {
 
-          e.dom.$element
+          e.dom
             .css({
               'width': e.bbox.width+'px',
               'height': e.bbox.height+'px',
@@ -286,7 +254,7 @@ angular
         this.miss = false;
         this.crash = false;
 
-        this.screen.dom.$element.removeClass('crash');
+        this.screen.dom.removeClass('crash');
 
       },
       $updateEach: function(bird, dt) {
@@ -334,7 +302,7 @@ angular
       $render: function() {
 
         if (this.miss || this.crash) {
-          this.screen.dom.$element.addClass('crash');
+          this.screen.dom.addClass('crash');
           if (this.crash) {
             ngEcs.$stop();
           }

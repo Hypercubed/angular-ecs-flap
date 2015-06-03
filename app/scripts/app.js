@@ -15,7 +15,9 @@ angular
     'ngSanitize',
     'ngTouch',
     'ngCookies',
-    'hc.ngEcs'
+    'hc.ngEcs',
+    'ngEcs.dom',
+    'ngEcs.FPSMeter'
   ])
   .config(function ($routeProvider) {
     $routeProvider
