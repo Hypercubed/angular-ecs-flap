@@ -86,7 +86,7 @@ html, body {
 }
 
 .canvas-bg {
-  width: 2061px;
+  width: 4123px;
   height: 768px;
   top: 0px;
   left: 0px;
@@ -98,7 +98,7 @@ html, body {
 }
 
 .canvas-bg-clouds {
-  width: 2061px;
+  width: 4123px;
   height: 768px;
   top: 0px;
   left: 0px;
@@ -117,10 +117,6 @@ html, body {
   .canvas-bg-clouds {
     background-image: url('../images/sf-paper-clouds-mobile.png');
   }
-}
-
-#canvas.land {
-  /* background-position: 0 708px; */
 }
 
 #canvas.crash {

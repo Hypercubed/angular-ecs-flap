@@ -6,7 +6,7 @@ angular.module('angularEcsFlapApp')
     var main = this;
 
     main.game = ngEcs;
-    ngEcs.$fps = isMobile ? 60 : 45;
+    ngEcs.$fps = isMobile ? 45 : 60;
 
     main.message = function() {
       if (main.game.$playing) {
@@ -37,7 +37,8 @@ angular.module('angularEcsFlapApp')
         selector: '.canvas-bg'
       },
       velocity: {x:-100,y:0},
-      scroll: {x:0,y:0,repeatX:2061}
+      position: {},
+      scroll: {x:2061}
     });
 
     ngEcs.$e({
@@ -45,7 +46,8 @@ angular.module('angularEcsFlapApp')
         selector: '.canvas-bg-clouds'
       },
       velocity: {x:-50,y:0},
-      scroll: {x:0,y:0,repeatX:2061}
+      position: {},
+      scroll: {x:2061}
     });
 
     $document.on('keydown', function(e) {

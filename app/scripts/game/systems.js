@@ -86,10 +86,25 @@ angular
     function radToDeg(a) {
       return a*180/Math.PI;
     }
+    
+    ngEcs.$s('velocity', {
+      $require: ['position','velocity'],
+      $updateEach: function(e, dt) {
+        e.position.x += e.velocity.x*dt;
+        e.position.y += e.velocity.y*dt;
+      }
+    });
+    
+    ngEcs.$s('scroll', {
+      $require: ['scroll','position'],
+      $updateEach: function(e,dt) {
+        e.position.x %= e.scroll.x;
+        //e.position.y %= e.position.y;
+      }
+    });
 
     ngEcs.$s('position', {
       $require: ['position','dom','velocity'],
-
       $addEntity: function(e) {
         var c = ngEcs.entities.canvas.dom;
         var ee = e.dom;
@@ -132,27 +147,8 @@ angular
           e.dom.transform(sys.getTranslation(e));
         });
       },
-      $updateEach: function(e, dt) {
-        e.position.x += e.velocity.x*dt;
-        e.position.y += e.velocity.y*dt;
-      },
       $renderEach: function(e) {
         e.dom.transform(this.getTranslation(e));
-      }
-    });
-
-    ngEcs.$s('scroll', {
-      $require: ['scroll','dom','velocity'],
-      $addEntity: function(e) {
-        e.dom.css('width', e.scroll.repeatX*2+'px');
-        e.dom.transform(e.scroll.x, e.scroll.y);
-      },
-      $updateEach: function(e,dt) {
-        e.scroll.x = (e.scroll.x + e.velocity.x*dt) % e.scroll.repeatX;
-        e.scroll.y = (e.scroll.y + e.velocity.y*dt);
-      },
-      $renderEach: function(e) {
-        e.dom.transform(e.scroll.x, e.scroll.y);
       }
     });
 
@@ -294,6 +290,7 @@ angular
             }
           } else if (pipeBox.right < (screenBox.left-screenBox.width/8)) {
             pipe.position.x = 9*screenBox.width/8;
+            //pipe.position.x = pipe.position.x % screenBox.width/8;
             pipe.pipe.cleared = false;
           }
         }

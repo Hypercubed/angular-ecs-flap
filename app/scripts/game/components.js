@@ -1,3 +1,5 @@
+/* global angular: true */
+
 'use strict';
 
 angular.module('ngEcs.dom', ['hc.ngEcs'])
@@ -47,7 +49,7 @@ angular.module('ngEcs.dom', ['hc.ngEcs'])
           return this.prefixedCss('transform',x);
         }
         x = ~~x || 0;
-        y = ~~y || 0
+        y = ~~y || 0;
         z = ~~z || 0;
         return this.prefixedCss('transform', 'translate3d('+x+'px,'+y+'px,'+z+'px)');
       };
@@ -56,6 +58,8 @@ angular.module('ngEcs.dom', ['hc.ngEcs'])
     });
 
   });
+
+/* global Victor: true */
 
 angular
   .module('angularEcsFlapApp')
@@ -66,7 +70,7 @@ angular
     ngEcs.$c('position', Victor);
     ngEcs.$c('velocity', Victor);
     ngEcs.$c('acc', Victor);
-    ngEcs.$c('scroll', {x:0,y:0,repeatX:0});
+    ngEcs.$c('scroll', Victor);
 
     function BBox() {
       this.width = this.height = 0;
