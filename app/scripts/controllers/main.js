@@ -62,6 +62,9 @@ angular.module('angularEcsFlapApp')
 
       c.prefixedCss('transform-origin', '0 0')
         .transform('translate3d(0,0,0) scale3d('+scaleX+','+scaleX+',1)');
+       
+      var h = c.prop('offsetHeight');
+      container.style['height'] = h*scaleX+'px';
 
     }
 

@@ -1,4 +1,5 @@
 /* global FPSMeter:true */
+/* global rStats */
 
 'use strict';
 
@@ -6,38 +7,87 @@ angular
   .module('ngEcs.FPSMeter', ['hc.ngEcs'])
   .run(function(ngEcs, $document) {
 
-    ngEcs.$s('meter', {
-      meter: null,
-      $added: function() {
-        var meter = this.meter = new FPSMeter({
-          graph:   1, // Whether to show history graph.
-          history: 20 // How many history states to show in a graph.
-        });
-        meter.hide();
+    //ngEcs.$s('meter', {
+    //  $added: function() {
 
+        var meter = rStats( {
+          values: {
+            raf: { caption: 'Time since last rAF (ms)' },
+            fps: { caption: 'Framerate (FPS)', below: 30 },
+            update: { caption: 'Update (ms)' },
+            render: { caption: 'Render (ms)' }
+          },
+          groups: [
+              { caption: 'Framerate', values: [ 'fps', 'raf' ] },
+              { caption: 'Frame Budget', values: [ 'update', 'render' ] }
+          ]
+        });
+    
+        var elm = angular.element(document.querySelector('.rs-base'));
+        elm.addClass('ng-hide');
+        
+        var running = false;
+        
         $document
           .on('keypress', function(e) {
             if (e.which === 126) {
-              if (meter.isPaused) {
-                meter.show();
+              if (running) {
+                running = false;
+                elm.addClass('ng-hide');
+                off();
               } else {
-                meter.hide();
+                running = true;
+                elm.removeClass('ng-hide');
+                on();
               }
             }
           });
+          
+        function on() {
+          ngEcs.updated.add(updateStart, null, 1000);  // first
+          ngEcs.updated.add(updateEnd, null, -1);  // last
+    
+          ngEcs.rendered.add(renderStart, null, 1000);  // first
+          ngEcs.rendered.add(renderEnd, null, -1000);  // last
+        }
+    
+        function off() {
+          ngEcs.updated.remove(updateStart, null);
+          ngEcs.updated.remove(updateEnd, null);
+    
+          ngEcs.rendered.remove(renderStart, null);
+          ngEcs.rendered.remove(renderEnd, null);
+        }
+    
+        function updateStart() {
+          meter('update').start();
+        }
+        
+        function updateEnd() { 
+          meter('update').end();
+          console.log('update'); 
+        }
+        
+        function renderStart() { 
+          meter('render').start();
+          meter( 'rAF' ).tick();
+        }
+        
+        function renderEnd() { 
+          meter('fps').frame();
+          meter('render').end();
+          meter().update();
+        }
 
-      },
-      $render: function() {
-        this.meter.tick();
-      }
-    });
-
+      //}
+    //});
+    
   });
 
 angular
   .module('angularEcsFlapApp')
   .run(function ($window, $document, $cookies, ngEcs, assemblies, isMobile) {
-
+    
     var power = 400;
 
     ngEcs.$s('controls', {
