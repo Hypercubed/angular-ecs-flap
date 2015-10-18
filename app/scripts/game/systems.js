@@ -22,12 +22,12 @@ angular
               { caption: 'Frame Budget', values: [ 'update', 'render' ] }
           ]
         });
-    
+
         var elm = angular.element(document.querySelector('.rs-base'));
         elm.addClass('ng-hide');
-        
+
         var running = false;
-        
+
         $document
           .on('keypress', function(e) {
             if (e.which === 126) {
@@ -42,38 +42,36 @@ angular
               }
             }
           });
-          
+
+        var nodes = [];
         function on() {
-          ngEcs.updated.add(updateStart, null, 1000);  // first
-          ngEcs.updated.add(updateEnd, null, -1);  // last
-    
-          ngEcs.rendered.add(renderStart, null, 1000);  // first
-          ngEcs.rendered.add(renderEnd, null, -1000);  // last
+          nodes.push(ngEcs.beforeUpdate.add(updateStart));  // first
+          nodes.push(ngEcs.afterUpdate.add(updateEnd));  // last
+
+          nodes.push(ngEcs.beforeRender.add(renderStart));  // first
+          nodes.push(ngEcs.afterRender.add(renderEnd));  // last
         }
-    
+
         function off() {
-          ngEcs.updated.remove(updateStart, null);
-          ngEcs.updated.remove(updateEnd, null);
-    
-          ngEcs.rendered.remove(renderStart, null);
-          ngEcs.rendered.remove(renderEnd, null);
+          nodes.forEach(function(node) {
+            node.detach();
+          });
         }
-    
+
         function updateStart() {
           meter('update').start();
         }
-        
-        function updateEnd() { 
+
+        function updateEnd() {
           meter('update').end();
-          console.log('update'); 
         }
-        
-        function renderStart() { 
+
+        function renderStart() {
           meter('render').start();
           meter( 'rAF' ).tick();
         }
-        
-        function renderEnd() { 
+
+        function renderEnd() {
           meter('fps').frame();
           meter('render').end();
           meter().update();
@@ -81,13 +79,13 @@ angular
 
       //}
     //});
-    
+
   });
 
 angular
   .module('angularEcsFlapApp')
   .run(function ($window, $document, $cookies, ngEcs, assemblies, isMobile) {
-    
+
     var power = 400;
 
     ngEcs.$s('controls', {
@@ -136,7 +134,7 @@ angular
     function radToDeg(a) {
       return a*180/Math.PI;
     }
-    
+
     ngEcs.$s('velocity', {
       $require: ['position','velocity'],
       $updateEach: function(e, dt) {
@@ -144,7 +142,7 @@ angular
         e.position.y += e.velocity.y*dt;
       }
     });
-    
+
     ngEcs.$s('scroll', {
       $require: ['scroll','position'],
       $updateEach: function(e,dt) {

@@ -10,7 +10,7 @@
  */
 angular
   .module('angularEcsFlapApp', [
-    'ngAnimate',
+    //'ngAnimate',
     'ngRoute',
     'ngSanitize',
     'ngTouch',
