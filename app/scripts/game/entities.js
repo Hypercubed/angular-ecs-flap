@@ -1,3 +1,5 @@
+/* global angular */
+
 'use strict';
 
 angular
@@ -34,7 +36,7 @@ angular
 
     bird: {
       dom: {
-        selector: '#bird',
+        selector: '#bird'
       },
       bbox: {},
       velocity: {

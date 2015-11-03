@@ -1,3 +1,4 @@
+/* global angular */
 'use strict';
 
 /**
@@ -10,7 +11,7 @@
  */
 angular
   .module('angularEcsFlapApp', [
-    //'ngAnimate',
+    // 'ngAnimate',
     'ngRoute',
     'ngSanitize',
     'ngTouch',
@@ -34,6 +35,6 @@ angular
         redirectTo: '/'
       });
   })
-  .factory('isMobile', function($window) {
+  .factory('isMobile', function ($window) {
     return $window.innerWidth < 768;
   });
